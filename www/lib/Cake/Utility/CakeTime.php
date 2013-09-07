@@ -248,7 +248,7 @@ class CakeTime {
  */
 	public static function convert($serverTime, $timezone) {
 		static $serverTimezone = null;
-		if ($serverTimezone === null || (date_default_timezone_get() !== $serverTimezone->getName())) {
+		if (is_null($serverTimezone) || (date_default_timezone_get() !== $serverTimezone->getName())) {
 			$serverTimezone = new DateTimeZone(date_default_timezone_get());
 		}
 		$serverOffset = $serverTimezone->getOffset(new DateTime('@' . $serverTime));
@@ -313,11 +313,6 @@ class CakeTime {
  */
 	public static function fromString($dateString, $timezone = null) {
 		if (empty($dateString)) {
-			return false;
-		}
-
-		$containsDummyDate = (is_string($dateString) && substr($dateString, 0, 10) === '0000-00-00');
-		if ($containsDummyDate) {
 			return false;
 		}
 
@@ -474,32 +469,6 @@ class CakeTime {
 		$timestamp = self::fromString($dateString, $timezone);
 		$now = self::fromString('now', $timezone);
 		return date('Y-m-d', $timestamp) == date('Y-m-d', $now);
-	}
-
-/**
- * Returns true if given datetime string is in the future.
- *
- * @param integer|string|DateTime $dateString UNIX timestamp, strtotime() valid string or DateTime object
- * @param string|DateTimeZone $timezone Timezone string or DateTimeZone object
- * @return boolean True if datetime string is in the future
- * @link http://book.cakephp.org/2.0/en/core-libraries/helpers/time.html#testing-time
- */
-	public static function isFuture($dateString, $timezone = null) {
-		$timestamp = self::fromString($dateString, $timezone);
-		return $timestamp > time();
-	}
-
-/**
- * Returns true if given datetime string is in the past.
- *
- * @param integer|string|DateTime $dateString UNIX timestamp, strtotime() valid string or DateTime object
- * @param string|DateTimeZone $timezone Timezone string or DateTimeZone object
- * @return boolean True if datetime string is in the past
- * @link http://book.cakephp.org/2.0/en/core-libraries/helpers/time.html#testing-time
- */
-	public static function isPast($dateString, $timezone = null) {
-		$timestamp = self::fromString($dateString, $timezone);
-		return $timestamp < time();
 	}
 
 /**
@@ -673,7 +642,7 @@ class CakeTime {
 	public static function toRSS($dateString, $timezone = null) {
 		$date = self::fromString($dateString, $timezone);
 
-		if ($timezone === null) {
+		if (is_null($timezone)) {
 			return date("r", $date);
 		}
 
@@ -697,7 +666,7 @@ class CakeTime {
 	}
 
 /**
- * Returns either a relative or a formatted absolute date depending
+ * Returns either a relative date or a formatted date depending
  * on the difference between the current time and given datetime.
  * $datetime should be in a *strtotime* - parsable format, like MySQL's datetime datatype.
  *
@@ -713,8 +682,6 @@ class CakeTime {
  *    - minute => The format if minutes > 0 (default "minute")
  *    - second => The format if seconds > 0 (default "second")
  * - `end` => The end of relative time telling
- * - `relativeString` => The printf compatible string when outputting relative time
- * - `absoluteString` => The printf compatible string when outputting absolute time
  * - `userOffset` => Users offset from GMT (in hours) *Deprecated* use timezone intead.
  * - `timezone` => The user timezone the timestamp should be formatted in.
  *
@@ -739,8 +706,6 @@ class CakeTime {
 		$timezone = null;
 		$format = self::$wordFormat;
 		$end = self::$wordEnd;
-		$relativeString = __d('cake', '%s ago');
-		$absoluteString = __d('cake', 'on %s');
 		$accuracy = self::$wordAccuracy;
 
 		if (is_array($options)) {
@@ -765,14 +730,6 @@ class CakeTime {
 			}
 			if (isset($options['end'])) {
 				$end = $options['end'];
-			}
-			if (isset($options['relativeString'])) {
-				$relativeString = $options['relativeString'];
-				unset($options['relativeString']);
-			}
-			if (isset($options['absoluteString'])) {
-				$absoluteString = $options['absoluteString'];
-				unset($options['absoluteString']);
 			}
 			unset($options['end'], $options['format']);
 		} else {
@@ -860,78 +817,51 @@ class CakeTime {
 		}
 
 		if ($diff > abs($now - self::fromString($end))) {
-			return sprintf($absoluteString, date($format, $inSeconds));
+			return __d('cake', 'on %s', date($format, $inSeconds));
 		}
 
-		$fWord = $accuracy['second'];
+		$f = $accuracy['second'];
 		if ($years > 0) {
-			$fWord = $accuracy['year'];
+			$f = $accuracy['year'];
 		} elseif (abs($months) > 0) {
-			$fWord = $accuracy['month'];
+			$f = $accuracy['month'];
 		} elseif (abs($weeks) > 0) {
-			$fWord = $accuracy['week'];
+			$f = $accuracy['week'];
 		} elseif (abs($days) > 0) {
-			$fWord = $accuracy['day'];
+			$f = $accuracy['day'];
 		} elseif (abs($hours) > 0) {
-			$fWord = $accuracy['hour'];
+			$f = $accuracy['hour'];
 		} elseif (abs($minutes) > 0) {
-			$fWord = $accuracy['minute'];
+			$f = $accuracy['minute'];
 		}
 
-		$fNum = str_replace(array('year', 'month', 'week', 'day', 'hour', 'minute', 'second'), array(1, 2, 3, 4, 5, 6, 7), $fWord);
+		$f = str_replace(array('year', 'month', 'week', 'day', 'hour', 'minute', 'second'), array(1, 2, 3, 4, 5, 6, 7), $f);
 
 		$relativeDate = '';
-		if ($fNum >= 1 && $years > 0) {
+		if ($f >= 1 && $years > 0) {
 			$relativeDate .= ($relativeDate ? ', ' : '') . __dn('cake', '%d year', '%d years', $years, $years);
 		}
-		if ($fNum >= 2 && $months > 0) {
+		if ($f >= 2 && $months > 0) {
 			$relativeDate .= ($relativeDate ? ', ' : '') . __dn('cake', '%d month', '%d months', $months, $months);
 		}
-		if ($fNum >= 3 && $weeks > 0) {
+		if ($f >= 3 && $weeks > 0) {
 			$relativeDate .= ($relativeDate ? ', ' : '') . __dn('cake', '%d week', '%d weeks', $weeks, $weeks);
 		}
-		if ($fNum >= 4 && $days > 0) {
+		if ($f >= 4 && $days > 0) {
 			$relativeDate .= ($relativeDate ? ', ' : '') . __dn('cake', '%d day', '%d days', $days, $days);
 		}
-		if ($fNum >= 5 && $hours > 0) {
+		if ($f >= 5 && $hours > 0) {
 			$relativeDate .= ($relativeDate ? ', ' : '') . __dn('cake', '%d hour', '%d hours', $hours, $hours);
 		}
-		if ($fNum >= 6 && $minutes > 0) {
+		if ($f >= 6 && $minutes > 0) {
 			$relativeDate .= ($relativeDate ? ', ' : '') . __dn('cake', '%d minute', '%d minutes', $minutes, $minutes);
 		}
-		if ($fNum >= 7 && $seconds > 0) {
+		if ($f >= 7 && $seconds > 0) {
 			$relativeDate .= ($relativeDate ? ', ' : '') . __dn('cake', '%d second', '%d seconds', $seconds, $seconds);
 		}
 
-		$aboutAgo = array(
-			'second' => __d('cake', 'about a second ago'),
-			'minute' => __d('cake', 'about a minute ago'),
-			'hour' => __d('cake', 'about an hour ago'),
-			'day' => __d('cake', 'about a day ago'),
-			'week' => __d('cake', 'about a week ago'),
-			'year' => __d('cake', 'about a year ago')
-		);
-
-		$aboutIn = array(
-			'second' => __d('cake', 'in about a second'),
-			'minute' => __d('cake', 'in about a minute'),
-			'hour' => __d('cake', 'in about an hour'),
-			'day' => __d('cake', 'in about a day'),
-			'week' => __d('cake', 'in about a week'),
-			'year' => __d('cake', 'in about a year')
-		);
-
-		// When time has passed
-		if (!$backwards && $relativeDate) {
-			return sprintf($relativeString, $relativeDate);
-		}
 		if (!$backwards) {
-			return $aboutAgo[$fWord];
-		}
-
-		// When time is to come
-		if (!$relativeDate) {
-			return $aboutIn[$fWord];
+			return __d('cake', '%s ago', $relativeDate);
 		}
 
 		return $relativeDate;

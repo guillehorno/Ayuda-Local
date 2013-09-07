@@ -191,9 +191,9 @@ class String {
  * - clean: A boolean or array with instructions for String::cleanInsert
  *
  * @param string $str A string containing variable placeholders
- * @param array $data A key => val array where each key stands for a placeholder variable name
+ * @param string $data A key => val array where each key stands for a placeholder variable name
  *     to be replaced with val
- * @param array $options An array of options, see description above
+ * @param string $options An array of options, see description above
  * @return string
  */
 	public static function insert($str, $data, $options = array()) {
@@ -256,7 +256,7 @@ class String {
  * by String::insert().
  *
  * @param string $str
- * @param array $options
+ * @param string $options
  * @return string
  * @see String::insert()
  */
@@ -524,7 +524,7 @@ class String {
 						}
 					}
 
-					$truncate .= mb_substr($tag[3], 0, $left + $entitiesLength);
+					$truncate .= mb_substr($tag[3], 0 , $left + $entitiesLength);
 					break;
 				} else {
 					$truncate .= $tag[3];

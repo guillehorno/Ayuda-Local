@@ -117,17 +117,14 @@ class Sqlserver extends DboSource {
 	public function connect() {
 		$config = $this->config;
 		$this->connected = false;
-
-		$flags = array(
-			PDO::ATTR_PERSISTENT => $config['persistent'],
-			PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
-		);
-
-		if (!empty($config['encoding'])) {
-			$flags[PDO::SQLSRV_ATTR_ENCODING] = $config['encoding'];
-		}
-
 		try {
+			$flags = array(
+				PDO::ATTR_PERSISTENT => $config['persistent'],
+				PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+			);
+			if (!empty($config['encoding'])) {
+				$flags[PDO::SQLSRV_ATTR_ENCODING] = $config['encoding'];
+			}
 			$this->_connection = new PDO(
 				"sqlsrv:server={$config['host']};Database={$config['database']}",
 				$config['login'],
@@ -135,11 +132,6 @@ class Sqlserver extends DboSource {
 				$flags
 			);
 			$this->connected = true;
-			if (!empty($config['settings'])) {
-				foreach ($config['settings'] as $key => $value) {
-					$this->_execute("SET $key $value");
-				}
-			}
 		} catch (PDOException $e) {
 			throw new MissingConnectionException(array(
 				'class' => get_class($this),
@@ -620,7 +612,7 @@ class Sqlserver extends DboSource {
 					continue;
 				}
 				$resultRow[$table][$column] = $row[$col];
-				if ($type === 'boolean' && $row[$col] !== null) {
+				if ($type === 'boolean' && !is_null($row[$col])) {
 					$resultRow[$table][$column] = $this->boolean($resultRow[$table][$column]);
 				}
 			}

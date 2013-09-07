@@ -331,7 +331,6 @@ class CakeValidationSet implements ArrayAccess, IteratorAggregate, Countable {
  *
  * @param string $index name of the rule
  * @param CakeValidationRule|array rule to add to $index
- * @return void
  */
 	public function offsetSet($index, $rule) {
 		$this->setRule($index, $rule);
