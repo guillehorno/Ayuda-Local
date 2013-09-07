@@ -26,6 +26,8 @@
             width: 630px;
             height: 350px;
          }
+
+         #map-canvas img{max-width: inherit;}
     </style>
 </head>
 <body>
