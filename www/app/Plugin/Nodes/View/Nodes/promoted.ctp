@@ -36,9 +36,10 @@
     $(document).ready(function() {
         ayudalocal.mapeo().mostrar({
             selector: 'map-canvas',
-            casos: [
-            { lat: -34.397, long: 150.644, title: 'Titulo', details: 'Detalles', callback: function () { alert('detalles'); },afectados:'af1',necesitan:'nec1',contacto:'c1' },
-            { lat: -34.596, long: 150.643, title: 'Titulo 2', details: 'Detalles 2', callback: function () { alert('detalles 2'); },afectados:'af2',necesitan:'nec2',contacto:'c2' }]
+                casos: [
+                    { id: 1, lat: -32.85321935039961, long: -68.86436462402344, title: 'Familia Kohuri', details: 'Una familia de Guaymallén perdió todas sus pertenencias al incendiarse su casa en la noche de este lunes. Necesitan ayuda porque sus hijos no tienen ropa para vestirse.', callback: function () { alert('detalles'); }, afectados: 'Familia Kohuri', necesitan: 'ropa, muebles, materiales de construcción, electrodimesticos, utiles escolares, dinero.', contacto: 'Carlos El Kohuri, 0261-155273491' },
+                    { id: 2, lat: -32.88782406149432, long: -68.81439277110985, title: 'Familia Perez', details: 'Mas info: Más de 30 viviendas afectadas por voladuras de techos y caídas de árboles, calles cortadas y dos focos de incendio', callback: function () { alert('detalles 2'); }, afectados: 'Familia Perez', necesitan: 'nylons, rollizos', contacto: 'Juan Carlos Perez, 555-3555' }
+                ]
         });
 });
 "); ?>

@@ -65,14 +65,13 @@ ayudalocal.mapeo = function () {
     };
 
     generarHtmlMarker = function (i) {
-        var html = "<div>";
-        html += "<h1>" + casos[i].title + "</h1>";
-        html += "<hr/>";
-        html += "<h2>Afectados</h2>";
+        var html = '<div class="panel">';
+        html += "<h3>" + casos[i].title + "</h3>";
+        html += "<h4>Afectados</h4>";
         html += casos[i].afectados;
-        html += "<h2>Ayuda Necesitada</h2>";
+        html += "<h4>Ayuda Necesitada</h4>";
         html += casos[i].necesitan;
-        html += "<h2>Información de Contacto</h2>";
+        html += "<h4>Información de Contacto</h4>";
         html += casos[i].contacto;
         html += "<hr/>";
         html += "<a href='#' onclick='ayudalocal.mapeo().seleccionCaso(" + casos[i].id + ");'>Detalles</a>";

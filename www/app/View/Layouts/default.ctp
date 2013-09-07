@@ -32,7 +32,7 @@
     <nav class="top-bar">
         <ul class="title-area">
             <li class="name">
-                <h1><a href="#">AyudaLocal</a></h1>
+                <h1><?php echo $this->Html->link('AyudaLocal', '/'); ?></h1>
             </li>
             <li class="toggle-topbar menu-icon"><a href="#"><span>Menu</span></a></li>
         </ul>
