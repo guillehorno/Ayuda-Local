@@ -6,13 +6,15 @@ ayudalocal.mapeo = function () {
     var casos;
     var agregarMensaje;
     var generarHtmlMarker;
+    var seleccionCaso;
+    var successLocation;
+    var errorLocation;
+    var options;
 
-    mostrar = function (options) {
-
-        casos = options.casos;
-
+    successLocation = function (position) {
+        
         var mapOptions = {
-            center: new google.maps.LatLng(-34.397, 150.644),
+            center: new google.maps.LatLng(position.coords.latitude, position.coords.longitude),
             zoom: 8,
             mapTypeId: google.maps.MapTypeId.ROADMAP
         };
@@ -30,16 +32,34 @@ ayudalocal.mapeo = function () {
 
             agregarMensaje(marker, i);
         }
-      
+    };
 
+    errorLocation = function () {
 
     };
 
-    agregarMensaje = function(marker, i) {
+    mostrar = function (paramoptions) {
+
+        options = paramoptions;
+        casos = options.casos;
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(successLocation, errorLocation);
+        } else {
+            alert('geolocation not supported');
+        }
+
+    };
+
+    seleccionCaso = function (id) {
+        alert(id);
+    };
+
+    agregarMensaje = function (marker, i) {
 
         var infowindow = new google.maps.InfoWindow({ content: generarHtmlMarker(i) });
 
-        google.maps.event.addListener(marker, 'click', function() {
+        google.maps.event.addListener(marker, 'click', function () {
             infowindow.open(marker.get('map'), marker);
         });
     };
@@ -55,12 +75,13 @@ ayudalocal.mapeo = function () {
         html += "<h2>Información de Contacto</h2>";
         html += casos[i].contacto;
         html += "<hr/>";
-        html += "<a href='#' onclick='"+""+"'>Contribuir</a>";
+        html += "<a href='#' onclick='ayudalocal.mapeo().seleccionCaso(" + casos[i].id + ");'>Detalles</a>";
         html += "</div>";
         return html;
     };
 
     return {
+        seleccionCaso: seleccionCaso,
         mostrar: mostrar
     };
 };
