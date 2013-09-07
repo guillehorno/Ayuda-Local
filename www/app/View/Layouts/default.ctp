@@ -2,10 +2,7 @@
 <html>
 <head>
     <?php echo $this->Html->charset(); ?>
-    <title>
-        <?php echo $cakeDescription ?>:
-        <?php echo $title_for_layout; ?>
-    </title>
+    <title><?php echo $title_for_layout; ?></title>
       <meta name="viewport" content="width=device-width" />
     <?php
         echo $this->Html->meta('icon');
@@ -18,8 +15,18 @@
         echo $this->Html->css('foundation');
 
         // javascript
+        echo $this->Html->script('jquery-1.10.2.min');
         echo $this->Html->script('foundation.min');
     ?>
+    <script type="text/javascript"
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBGeP4luSbPxpT1g0s08OjdptKNQJ8Xj2s&sensor=true">
+    </script>
+    <style>
+         #map-canvas {
+            width: 630px;
+            height: 350px;
+         }
+    </style>
 </head>
 <body>
     <nav class="top-bar">
@@ -65,6 +72,7 @@
     </script>
 
     <?php
+    echo $this->Html->script('mapeo');
     echo $this->Html->script('foundation/foundation');
     echo $this->Html->script('foundation/foundation.alerts');
     echo $this->Html->script('foundation/foundation.clearing');

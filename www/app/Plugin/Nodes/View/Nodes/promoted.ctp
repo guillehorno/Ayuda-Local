@@ -6,7 +6,9 @@
 
 <div class="row">
     <div class="large-8 columns">
-        <img src="http://dummyimage.com/630x400/eeeeee/cccccc.gif&text=map+placeholder" alt="placeholder+image">
+        <div id="map-canvas">
+            &nbsp;
+        </div>
     </div><!-- /large-8 -->
 
     <div class="large-4 columns">
@@ -29,6 +31,17 @@
         </table>
     </div>
 </div>
+
+<?php echo $this->Html->scriptBlock("
+    $(document).ready(function() {
+        ayudalocal.mapeo().mostrar({
+            selector: 'map-canvas',
+            casos: [
+            { lat: -34.397, long: 150.644, title: 'Titulo', details: 'Detalles', callback: function () { alert('detalles'); },afectados:'af1',necesitan:'nec1',contacto:'c1' },
+            { lat: -34.596, long: 150.643, title: 'Titulo 2', details: 'Detalles 2', callback: function () { alert('detalles 2'); },afectados:'af2',necesitan:'nec2',contacto:'c2' }]
+        });
+});
+"); ?>
 
 <div class="nodes promoted">
     <?php
