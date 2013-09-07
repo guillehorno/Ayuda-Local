@@ -513,7 +513,7 @@ class TranslateBehavior extends ModelBehavior {
  * @return mixed string or false
  */
 	protected function _getLocale(Model $Model) {
-		if (!isset($Model->locale) || $Model->locale === null) {
+		if (!isset($Model->locale) || is_null($Model->locale)) {
 			$I18n = I18n::getInstance();
 			$I18n->l10n->get(Configure::read('Config.language'));
 			$Model->locale = $I18n->l10n->locale;
@@ -588,7 +588,7 @@ class TranslateBehavior extends ModelBehavior {
 
 			$this->_removeField($Model, $field);
 
-			if ($association === null) {
+			if (is_null($association)) {
 				if ($reset) {
 					$this->runtime[$Model->alias]['fields'][] = $field;
 				} else {
@@ -628,7 +628,6 @@ class TranslateBehavior extends ModelBehavior {
  *
  * @param Model $Model Model instance
  * @param string $field The field to update.
- * @return void
  */
 	protected function _removeField(Model $Model, $field) {
 		if (array_key_exists($field, $this->settings[$Model->alias])) {
@@ -677,7 +676,7 @@ class TranslateBehavior extends ModelBehavior {
 
 			$this->_removeField($Model, $field);
 
-			if ($association !== null && (isset($Model->hasMany[$association]) || isset($Model->__backAssociation['hasMany'][$association]))) {
+			if (!is_null($association) && (isset($Model->hasMany[$association]) || isset($Model->__backAssociation['hasMany'][$association]))) {
 				$associations[] = $association;
 			}
 		}

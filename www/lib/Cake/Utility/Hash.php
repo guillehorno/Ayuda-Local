@@ -816,7 +816,7 @@ class Hash {
 		$stack = array();
 		foreach ($data as $k => $r) {
 			$id = $k;
-			if ($key !== null) {
+			if (!is_null($key)) {
 				$id = $key;
 			}
 			if (is_array($r) && !empty($r)) {

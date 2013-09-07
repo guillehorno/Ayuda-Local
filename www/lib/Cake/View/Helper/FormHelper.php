@@ -218,9 +218,11 @@ class FormHelper extends AppHelper {
 
 		if ($key === 'validates' && !isset($this->fieldset[$model]['validates'])) {
 			$validates = array();
-			foreach ($object->validator() as $validateField => $validateProperties) {
-				if ($this->_isRequiredField($validateProperties)) {
-					$validates[$validateField] = true;
+			if (!empty($object->validate)) {
+				foreach ($object->validator() as $validateField => $validateProperties) {
+					if ($this->_isRequiredField($validateProperties)) {
+						$validates[$validateField] = true;
+					}
 				}
 			}
 			$this->fieldset[$model]['validates'] = $validates;
@@ -597,9 +599,9 @@ class FormHelper extends AppHelper {
  *
  * @param boolean $lock Whether this field should be part of the validation
  *     or excluded as part of the unlockedFields.
- * @param string $field Reference to field to be secured. Should be dot separated to indicate nesting.
+ * @param string|array $field Reference to field to be secured. Should be dot separated to indicate nesting.
  * @param mixed $value Field value, if value should not be tampered with.
- * @return mixed|null Not used yet
+ * @return void
  */
 	protected function _secure($lock, $field = null, $value = null) {
 		if (!$field) {
@@ -647,14 +649,14 @@ class FormHelper extends AppHelper {
  *
  * ### Options:
  *
- * - `escape` bool - Whether or not to html escape the contents of the error.
- * - `wrap` mixed - Whether or not the error message should be wrapped in a div. If a
+ * - `escape`  bool  Whether or not to html escape the contents of the error.
+ * - `wrap`  mixed  Whether or not the error message should be wrapped in a div. If a
  *   string, will be used as the HTML tag to use.
- * - `class` string - The classname for the error message
+ * - `class` string  The classname for the error message
  *
  * @param string $field A field name, like "Modelname.fieldname"
  * @param string|array $text Error message as string or array of messages.
- *   If array contains `attributes` key it will be used as options for error container
+ * If array contains `attributes` key it will be used as options for error container
  * @param array $options Rendering options for <div /> wrapper tag
  * @return string If there are errors this method returns an error message, otherwise null.
  * @link http://book.cakephp.org/2.0/en/core-libraries/helpers/form.html#FormHelper::error
@@ -1027,8 +1029,8 @@ class FormHelper extends AppHelper {
 /**
  * Generates an input element
  *
- * @param array $args The options for the input element
- * @return string The generated input element
+ * @param type $args
+ * @return type
  */
 	protected function _getInput($args) {
 		extract($args);
@@ -1067,7 +1069,7 @@ class FormHelper extends AppHelper {
 /**
  * Generates input options array
  *
- * @param array $options
+ * @param type $options
  * @return array Options
  */
 	protected function _parseOptions($options) {
@@ -1098,7 +1100,7 @@ class FormHelper extends AppHelper {
 /**
  * Generates list of options for multiple select
  *
- * @param array $options
+ * @param type $options
  * @return array
  */
 	protected function _optionsOptions($options) {
@@ -1108,7 +1110,7 @@ class FormHelper extends AppHelper {
 		$varName = Inflector::variable(
 			Inflector::pluralize(preg_replace('/_id$/', '', $this->field()))
 		);
-		$varOptions = $this->_View->get($varName);
+		$varOptions = $this->_View->getVar($varName);
 		if (!is_array($varOptions)) {
 			return $options;
 		}
@@ -1122,7 +1124,7 @@ class FormHelper extends AppHelper {
 /**
  * Magically set option type and corresponding options
  *
- * @param array $options
+ * @param type $options
  * @return array
  */
 	protected function _magicOptions($options) {
@@ -1190,7 +1192,7 @@ class FormHelper extends AppHelper {
 /**
  * Generate format options
  *
- * @param array $options
+ * @param type $options
  * @return array
  */
 	protected function _getFormat($options) {
@@ -1209,8 +1211,8 @@ class FormHelper extends AppHelper {
 /**
  * Generate label for input
  *
- * @param string $fieldName
- * @param array $options
+ * @param type $fieldName
+ * @param type $options
  * @return boolean|string false or Generated label element
  */
 	protected function _getLabel($fieldName, $options) {
@@ -1232,7 +1234,7 @@ class FormHelper extends AppHelper {
 /**
  * Calculates maxlength option
  *
- * @param array $options
+ * @param type $options
  * @return array
  */
 	protected function _maxLength($options) {
@@ -1308,8 +1310,9 @@ class FormHelper extends AppHelper {
  *
  * @param string $fieldName
  * @param string $label
- * @param array $options Options for the label element. 'NONE' option is deprecated and will be removed in 3.0
+ * @param array $options Options for the label element.
  * @return string Generated label element
+ * @deprecated 'NONE' option is deprecated and will be removed in 3.0
  */
 	protected function _inputLabel($fieldName, $label, $options) {
 		$labelAttributes = $this->domId(array(), 'for');
@@ -1736,7 +1739,7 @@ class FormHelper extends AppHelper {
  * @param string $title The content to be wrapped by <a> tags.
  * @param string|array $url Cake-relative URL or array of URL parameters, or external URL (starts with http://)
  * @param array $options Array of HTML attributes.
- * @param bool|string $confirmMessage JavaScript confirmation message.
+ * @param string $confirmMessage JavaScript confirmation message.
  * @return string An `<a />` element.
  * @link http://book.cakephp.org/2.0/en/core-libraries/helpers/form.html#FormHelper::postLink
  */
@@ -1784,11 +1787,12 @@ class FormHelper extends AppHelper {
 		$url = '#';
 		$onClick = 'document.' . $formName . '.submit();';
 		if ($confirmMessage) {
-			$options['onclick'] = $this->_confirm($confirmMessage, $onClick, '', $options);
+			$confirmMessage = str_replace(array("'", '"'), array("\'", '\"'), $confirmMessage);
+			$options['onclick'] = "if (confirm('{$confirmMessage}')) { {$onClick} }";
 		} else {
-			$options['onclick'] = $onClick . ' ';
+			$options['onclick'] = $onClick;
 		}
-		$options['onclick'] .= 'event.returnValue = false; return false;';
+		$options['onclick'] .= ' event.returnValue = false; return false;';
 
 		$out .= $this->Html->link($title, $url, $options);
 		return $out;
@@ -1877,7 +1881,7 @@ class FormHelper extends AppHelper {
 		} elseif ($isImage) {
 			unset($options['type']);
 			if ($caption{0} !== '/') {
-				$url = $this->webroot(Configure::read('App.imageBaseUrl') . $caption);
+				$url = $this->webroot(IMAGES_URL . $caption);
 			} else {
 				$url = $this->webroot(trim($caption, '/'));
 			}
@@ -2007,14 +2011,6 @@ class FormHelper extends AppHelper {
 			}
 		} else {
 			$tag = 'selectstart';
-		}
-
-		if ($tag !== 'checkboxmultiplestart' &&
-			!isset($attributes['required']) &&
-			empty($attributes['disabled']) &&
-			$this->_introspectModel($this->model(), 'validates', $this->field())
-		) {
-			$attributes['required'] = true;
 		}
 
 		if (!empty($tag) || isset($template)) {
@@ -2238,7 +2234,7 @@ class FormHelper extends AppHelper {
  * - `value` The selected value of the input.
  *
  * @param string $fieldName Prefix name for the SELECT element
- * @param array $attributes Array of Attributes
+ * @param string $attributes Array of Attributes
  * @return string Completed minute select input.
  * @link http://book.cakephp.org/2.0/en/core-libraries/helpers/form.html#FormHelper::minute
  */
@@ -2298,7 +2294,7 @@ class FormHelper extends AppHelper {
  * - `value` The selected value of the input.
  *
  * @param string $fieldName Prefix name for the SELECT element
- * @param array|string $attributes Array of Attributes
+ * @param string $attributes Array of Attributes
  * @return string Completed meridian select input
  * @link http://book.cakephp.org/2.0/en/core-libraries/helpers/form.html#FormHelper::meridian
  */
@@ -2342,14 +2338,13 @@ class FormHelper extends AppHelper {
  * - `separator` The contents of the string between select elements. Defaults to '-'
  * - `empty` - If true, the empty select option is shown. If a string,
  *   that string is displayed as the empty element.
- * - `round` - Set to `up` or `down` if you want to force rounding in either direction. Defaults to null.
  * - `value` | `default` The default value to be used by the input. A value in `$this->data`
  *   matching the field name will override this value. If no default is provided `time()` will be used.
  *
  * @param string $fieldName Prefix name for the SELECT element
  * @param string $dateFormat DMY, MDY, YMD, or null to not generate date inputs.
  * @param string $timeFormat 12, 24, or null to not generate time inputs.
- * @param array|string $attributes array of Attributes
+ * @param string $attributes array of Attributes
  * @return string Generated set of select boxes for the date and time formats chosen.
  * @link http://book.cakephp.org/2.0/en/core-libraries/helpers/form.html#FormHelper::dateTime
  */
@@ -2377,7 +2372,7 @@ class FormHelper extends AppHelper {
 
 		$defaults = array(
 			'minYear' => null, 'maxYear' => null, 'separator' => '-',
-			'interval' => 1, 'monthNames' => true, 'round' => null
+			'interval' => 1, 'monthNames' => true
 		);
 		$attributes = array_merge($defaults, (array)$attributes);
 		if (isset($attributes['minuteInterval'])) {
@@ -2389,7 +2384,6 @@ class FormHelper extends AppHelper {
 		$separator = $attributes['separator'];
 		$interval = $attributes['interval'];
 		$monthNames = $attributes['monthNames'];
-		$round = $attributes['round'];
 		$attributes = array_diff_key($attributes, $defaults);
 
 		if ($timeFormat == 12 && $hour == 12) {
@@ -2404,18 +2398,7 @@ class FormHelper extends AppHelper {
 			if ($hour !== null) {
 				$current->setTime($hour, $min);
 			}
-			$changeValue = $min * (1 / $interval);
-			switch ($round) {
-				case 'up':
-					$changeValue = ceil($changeValue);
-					break;
-				case 'down':
-					$changeValue = floor($changeValue);
-					break;
-				default:
-					$changeValue = round($changeValue);
-			}
-			$change = ($changeValue * $interval) - $min;
+			$change = (round($min * (1 / $interval)) * $interval) - $min;
 			$current->modify($change > 0 ? "+$change minutes" : "$change minutes");
 			$format = ($timeFormat == 12) ? 'Y m d h i a' : 'Y m d H i a';
 			$newTime = explode(' ', $current->format($format));
@@ -2884,7 +2867,7 @@ class FormHelper extends AppHelper {
  * @return array inputDefaults
  */
 	public function inputDefaults($defaults = null, $merge = false) {
-		if ($defaults !== null) {
+		if (!is_null($defaults)) {
 			if ($merge) {
 				$this->_inputDefaults = array_merge($this->_inputDefaults, (array)$defaults);
 			} else {
